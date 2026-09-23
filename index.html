@@ -2,500 +2,316 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>ECE Semester 1 Attendance</title>
 <style>
 :root{
-  --bg:#0b1020;--card:#121a2e;--card2:#18233d;--text:#edf2ff;
-  --muted:#94a3b8;--blue:#5b8cff;--green:#22c55e;--red:#ef4444;
-  --yellow:#f59e0b;--border:#293552;
+  --bg:#f5f7fb;--card:#ffffff;--card2:#eef1f8;--border:#dfe5f2;--text:#12162a;--muted:#5b6780;
+  --accent:#3260e8;--present:#128a4c;--absent:#d81e3f;--na:#6b7690;
+  --holiday:#a35d09;--holidaybg:#fdf0dc;--vacation:#2454c9;--vacationbg:#e7eefb;--exam:#b01248;--exambg:#fbe5ec;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
 }
+@media(prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0b0f1c;--card:#131a2c;--card2:#1a2338;--border:#28324c;--text:#e9edf7;--muted:#8b96b3;
+    --accent:#5b8cff;--present:#2fbf71;--absent:#f0475c;--na:#8b96b3;
+    --holiday:#e0a63c;--holidaybg:rgba(224,166,60,.14);--vacation:#5b9dff;--vacationbg:rgba(91,157,255,.14);
+    --exam:#f0577a;--exambg:rgba(240,87,122,.14);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0b0f1c;--card:#131a2c;--card2:#1a2338;--border:#28324c;--text:#e9edf7;--muted:#8b96b3;
+  --accent:#5b8cff;--present:#2fbf71;--absent:#f0475c;--na:#8b96b3;
+  --holiday:#e0a63c;--holidaybg:rgba(224,166,60,.14);--vacation:#5b9dff;--vacationbg:rgba(91,157,255,.14);
+  --exam:#f0577a;--exambg:rgba(240,87,122,.14);
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);
-font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif}
-header{padding:22px 5%;background:linear-gradient(135deg,#111b38,#0b1020);
-border-bottom:1px solid var(--border);position:sticky;top:0;z-index:5}
-h1{margin:0;font-size:25px}
-.subtitle{color:var(--muted);margin-top:5px}
-.container{max-width:1250px;margin:auto;padding:20px}
-.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
-button,.select{
-  border:1px solid var(--border);background:var(--card2);color:var(--text);
-  padding:10px 14px;border-radius:10px;cursor:pointer
-}
-button:hover{filter:brightness(1.15)}
-.primary{background:var(--blue);border-color:var(--blue)}
-.danger{background:#401c24;border-color:#7f1d1d}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
-.stat{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:15px}
-.stat b{font-size:24px;display:block}
-.stat span{color:var(--muted);font-size:13px}
-.week{background:var(--card);border:1px solid var(--border);border-radius:16px;
-margin-bottom:18px;overflow:hidden}
-.weekhead{padding:15px 18px;background:var(--card2);display:flex;
-justify-content:space-between;gap:10px;align-items:center}
-.weekhead h2{font-size:17px;margin:0}
-.weekbody{padding:12px}
-.day{border:1px solid var(--border);border-radius:12px;margin-bottom:10px;overflow:hidden}
-.dayhead{padding:12px 14px;background:#111a2f;display:flex;
-justify-content:space-between;align-items:center}
-.dayhead strong{font-size:15px}
-.badge{font-size:12px;padding:5px 8px;border-radius:999px;background:#263250;color:#cbd5e1}
-.badge.holiday{background:#422006;color:#fbbf24}
-.badge.vacation{background:#172554;color:#93c5fd}
-.badge.exam{background:#3f1d1d;color:#fca5a5}
-.classrow{display:grid;grid-template-columns:115px 1fr 240px;gap:12px;
-align-items:center;padding:12px 14px;border-top:1px solid var(--border)}
-.time{color:#93c5fd;font-size:13px}
-.subject{font-weight:600}
-.details{font-size:12px;color:var(--muted);margin-top:3px}
-.actions{display:flex;gap:6px;justify-content:flex-end}
-.actions button{padding:7px 9px;font-size:12px}
-.present.active{background:var(--green);border-color:var(--green);color:#04130a}
-.absent.active{background:var(--red);border-color:var(--red);color:white}
-.na.active{background:#64748b;border-color:#64748b;color:white}
-.empty{padding:18px;color:var(--muted)}
-.progress{height:7px;background:#27334f;border-radius:20px;margin-top:7px;overflow:hidden}
-.progress i{display:block;height:100%;background:var(--green)}
+body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,system-ui,sans-serif}
+header{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--border);padding:calc(14px + env(safe-area-inset-top,0px)) 5% 12px}
+h1{margin:0;font-size:20px;letter-spacing:-.01em}
+.subtitle{color:var(--muted);font-size:13px;margin-top:3px}
+.tabs{display:flex;gap:6px;margin-top:14px}
+.tabbtn{flex:1;padding:10px 8px;border-radius:10px;border:1px solid var(--border);background:var(--card2);color:var(--text);font-size:14px;font-weight:600;cursor:pointer}
+.tabbtn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.toolbar button{border:1px solid var(--border);background:var(--card);color:var(--text);padding:7px 11px;border-radius:8px;font-size:12.5px;cursor:pointer}
+.toolbar button:hover{filter:brightness(1.08)}
+.toolbar .danger{color:var(--absent);border-color:var(--absent)}
+main{max-width:960px;margin:0 auto;padding:16px 5% 60px}
+.panel{display:none}
+.panel.active{display:block}
+
+/* ---- day bubbles ---- */
+.bubblewrap{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;padding:4px 2px 16px;margin-bottom:6px}
+.bubblewrap::-webkit-scrollbar{height:6px}
+.bubblewrap::-webkit-scrollbar-thumb{background:var(--border);border-radius:6px}
+.monthlabel{flex:0 0 auto;display:flex;align-items:center;color:var(--muted);font-size:11px;font-weight:600;padding:0 4px;white-space:nowrap}
+.bubble{scroll-snap-align:center;flex:0 0 auto;width:52px;height:66px;border-radius:16px;border:1px solid var(--border);background:var(--card);color:var(--text);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;position:relative}
+.bubble .wd{font-size:11px;color:var(--muted)}
+.bubble .dt{font-size:17px;font-weight:700}
+.bubble .dot{position:absolute;bottom:7px;width:6px;height:6px;border-radius:50%;background:transparent}
+.bubble.today{border-color:var(--accent);border-width:2px}
+.bubble.selected{background:var(--accent);border-color:var(--accent)}
+.bubble.selected .wd,.bubble.selected .dt{color:#fff}
+.bubble.off-holiday{background:var(--holidaybg);border-color:var(--holiday)}
+.bubble.off-vacation{background:var(--vacationbg);border-color:var(--vacation)}
+.bubble.off-exam{background:var(--exambg);border-color:var(--exam)}
+.bubble.off-sun{opacity:.45}
+.bubble.all-present .dot{background:var(--present)}
+.bubble.has-absent .dot{background:var(--absent)}
+.bubble.partial .dot{background:var(--holiday)}
+
+/* ---- detail panel ---- */
+.detailcard{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px}
+.ddate{font-size:16px;font-weight:700}
+.dbadge{display:inline-block;margin-top:6px;font-size:12px;padding:4px 10px;border-radius:999px;background:var(--card2);color:var(--muted)}
+.dbadge.holiday{background:var(--holidaybg);color:var(--holiday)}
+.dbadge.vacation{background:var(--vacationbg);color:var(--vacation)}
+.dbadge.exam{background:var(--exambg);color:var(--exam)}
+.empty{padding:16px 0;color:var(--muted);font-size:14px}
+.classrow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:12px 0;border-top:1px solid var(--border)}
+.classrow:first-of-type{border-top:1px solid var(--border);margin-top:12px}
+.cinfo .time{color:var(--accent);font-size:12.5px;font-weight:600}
+.cinfo .subject{font-weight:700;font-size:15px;margin-top:1px}
+.cinfo .details{font-size:12px;color:var(--muted);margin-top:2px}
+.actions{display:flex;gap:6px}
+.actions button{padding:8px 10px;border-radius:9px;border:1px solid var(--border);background:var(--card2);color:var(--text);font-size:12px;cursor:pointer}
+.present.active{background:var(--present);border-color:var(--present);color:#fff}
+.absent.active{background:var(--absent);border-color:var(--absent);color:#fff}
+.na.active{background:var(--na);border-color:var(--na);color:#fff}
+
+/* ---- summary tab ---- */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px}
+.stat b{font-size:22px;display:block}
+.stat span{color:var(--muted);font-size:12px}
 .subjects{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .subjectcard{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:13px}
-.subjectcard small{color:var(--muted)}
-.note{padding:13px;background:#171f35;border-radius:10px;color:#cbd5e1;margin-bottom:18px}
-@media(max-width:850px){
- .stats{grid-template-columns:repeat(2,1fr)}
- .classrow{grid-template-columns:1fr}
- .actions{justify-content:flex-start}
- .subjects{grid-template-columns:1fr}
-}
-@media(max-width:500px){
- .stats{grid-template-columns:1fr 1fr}
- .container{padding:10px}
- header{padding:16px}
-}
+.subjectcard b{font-size:14px}
+.subjectcard small{color:var(--muted);display:block;margin-top:3px;font-size:11.5px}
+.progress{height:6px;background:var(--card2);border-radius:20px;margin-top:8px;overflow:hidden}
+.progress i{display:block;height:100%;background:var(--present)}
+h2{font-size:15px;margin:0 0 10px}
+@media(max-width:700px){.stats{grid-template-columns:repeat(2,1fr)}.subjects{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){.subjects{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-
 <header>
   <h1>ECE 2 — Semester 1 Attendance</h1>
-  <div class="subtitle">W.E.F. August–December 2026 · Weekly timetable · Attendance tracker</div>
-</header>
-
-<div class="container">
-
+  <div class="subtitle">Aug–Dec 2026 · Tap a date to mark attendance</div>
+  <div class="tabs">
+    <button class="tabbtn active" id="tabBtnSchedule" onclick="showTab('schedule')">📅 Schedule</button>
+    <button class="tabbtn" id="tabBtnSummary" onclick="showTab('summary')">📊 Attendance</button>
+  </div>
   <div class="toolbar">
-    <button class="primary" onclick="goToday()">📅 Today</button>
-    <button onclick="window.print()">🖨 Print</button>
-    <button onclick="exportData()">⬇ Export Backup</button>
-    <button onclick="document.getElementById('importFile').click()">⬆ Import Backup</button>
-    <button class="danger" onclick="clearData()">Reset Attendance</button>
+    <button onclick="goToday()">Jump to today</button>
+    <button onclick="window.print()">Print</button>
+    <button onclick="exportData()">Export backup</button>
+    <button onclick="document.getElementById('importFile').click()">Import backup</button>
+    <button class="danger" onclick="clearData()">Reset</button>
     <input id="importFile" type="file" accept=".json" style="display:none" onchange="importData(event)">
   </div>
-
-  <div class="note">
-    <b>How it works:</b> Tap Present or Absent for every class.
-    Your attendance is automatically saved on this device. Holidays, autumn
-    vacation, exam period and winter vacation are automatically shown.
-  </div>
-
-  <div class="stats">
-    <div class="stat"><b id="overall">0%</b><span>Overall attendance</span></div>
-    <div class="stat"><b id="presentCount">0</b><span>Classes attended</span></div>
-    <div class="stat"><b id="absentCount">0</b><span>Classes missed</span></div>
-    <div class="stat"><b id="totalCount">0</b><span>Classes marked</span></div>
-  </div>
-
-  <h2>Subject-wise Attendance</h2>
-  <div id="subjects" class="subjects"></div>
-
-  <h2 style="margin-top:28px">Weekly Attendance</h2>
-  <div id="weeks"></div>
-</div>
-
+</header>
+<main>
+  <section id="panelSchedule" class="panel active">
+    <div class="bubblewrap" id="bubbleWrap"></div>
+    <div class="detailcard" id="detailCard"></div>
+  </section>
+  <section id="panelSummary" class="panel">
+    <h2>Overall</h2>
+    <div class="stats">
+      <div class="stat"><b id="overall">0%</b><span>Attendance</span></div>
+      <div class="stat"><b id="presentCount">0</b><span>Present</span></div>
+      <div class="stat"><b id="absentCount">0</b><span>Absent</span></div>
+      <div class="stat"><b id="totalCount">0</b><span>Marked</span></div>
+    </div>
+    <h2>By subject</h2>
+    <div id="subjects" class="subjects"></div>
+  </section>
+</main>
 <script>
-/* =========================================================
-   TIMETABLE FROM THE PROVIDED IMAGE
-   ========================================================= */
-
 const schedule = {
-  1: [ // Monday
-    ["08:00–09:00","DECO — Practical (G1)","NS, SR · Room 213"],
-    ["08:00–09:00","EP-1 — Practical (G2)","ADK · Room 219"],
-    ["10:00–11:00","PPS","JS · Room 404"],
-    ["11:00–12:00","EP-1","AD · Room 404"],
-    ["12:30–13:30","EG — Practical (G2)","JK, RS · Room 606"],
-    ["13:30–14:30","EVS — Practical (G1)","SC, SD · Room 04"]
-  ],
-  2: [ // Tuesday
-    ["08:00–09:00","DECO","NS-1 · Room 404"],
-    ["09:00–10:00","SMT-1","NF-2 · Room 404"],
-    ["10:00–11:00","EM","BPS · Room 404"],
-    ["11:00–12:00","CS","AD-2 · Room 404"],
-    ["12:30–13:30","PPS","JS · Room 404"]
-  ],
-  3: [ // Wednesday
-    ["08:00–09:00","EVS","SC · Room 404"],
-    ["09:00–10:00","PPS","JS · Room 404"],
-    ["10:00–11:00","SMT-1","NF-2 · Room 404"],
-    ["11:00–12:00","DECO","NS-1 · Room 404"],
-    ["12:30–13:30","EM","BPS · Room 404"]
-  ],
-  4: [ // Thursday
-    ["08:00–09:00","EM","BPS · Room 302"],
-    ["09:00–10:00","EVS","SC · Room 302"],
-    ["10:00–11:00","DECO","NS-1 · Room 302"],
-    ["11:00–12:00","EP-1","AD · Room 302"]
-  ],
-  5: [ // Friday
-    ["08:00–10:00","EVS — Practical (G1)","SC, SD · Room 04"],
-    ["08:00–10:00","EP-1 — Practical (G1)","AD, AK · Room 219"],
-    ["10:00–11:00","EP-1","AD · Room 311"],
-    ["11:00–12:00","CS","AD-2 · Room 311"],
-    ["12:30–13:30","DECO — Practical (G2)","NS, SR · Room 214"],
-    ["13:30–14:30","PPS — Practical (G1)","PK, NF-1 · Room 106A"]
-  ],
-  6: [ // Saturday
-    ["08:00–10:00","EG — Practical (G1)","JK, RS · Room 606 · W-1"],
-    ["08:00–10:00","PPS — Practical (G2)","PS, NF-2 · Room 102 · W-1"],
-    ["10:00–11:00","CS","AD-2 · Room 510"],
-    ["11:00–12:00","SMT-1","NF-2 · Room 510"],
-    ["12:30–13:30","CS","AD-2 · Room 311 · W-4"],
-    ["13:30–14:30","SMT-1","NF-2 · Room 311 · W-4"]
-  ]
+  1:[["08:00–09:00","DECO — Practical (G1)","NS, SR · Room 213"],["08:00–09:00","EP-1 — Practical (G2)","ADK · Room 219"],["10:00–11:00","PPS","JS · Room 404"],["11:00–12:00","EP-1","AD · Room 404"],["12:30–13:30","EG — Practical (G2)","JK, RS · Room 606"],["13:30–14:30","EVS — Practical (G1)","SC, SD · Room 04"]],
+  2:[["08:00–09:00","DECO","NS-1 · Room 404"],["09:00–10:00","SMT-1","NF-2 · Room 404"],["10:00–11:00","EM","BPS · Room 404"],["11:00–12:00","CS","AD-2 · Room 404"],["12:30–13:30","PPS","JS · Room 404"]],
+  3:[["08:00–09:00","EVS","SC · Room 404"],["09:00–10:00","PPS","JS · Room 404"],["10:00–11:00","SMT-1","NF-2 · Room 404"],["11:00–12:00","DECO","NS-1 · Room 404"],["12:30–13:30","EM","BPS · Room 404"]],
+  4:[["08:00–09:00","EM","BPS · Room 302"],["09:00–10:00","EVS","SC · Room 302"],["10:00–11:00","DECO","NS-1 · Room 302"],["11:00–12:00","EP-1","AD · Room 302"]],
+  5:[["08:00–10:00","EVS — Practical (G1)","SC, SD · Room 04"],["08:00–10:00","EP-1 — Practical (G1)","AD, AK · Room 219"],["10:00–11:00","EP-1","AD · Room 311"],["11:00–12:00","CS","AD-2 · Room 311"],["12:30–13:30","DECO — Practical (G2)","NS, SR · Room 214"],["13:30–14:30","PPS — Practical (G1)","PK, NF-1 · Room 106A"]],
+  6:[["08:00–10:00","EG — Practical (G1)","JK, RS · Room 606 · W-1"],["08:00–10:00","PPS — Practical (G2)","PS, NF-2 · Room 102 · W-1"],["10:00–11:00","CS","AD-2 · Room 510"],["11:00–12:00","SMT-1","NF-2 · Room 510"],["12:30–13:30","CS","AD-2 · Room 311 · W-4"],["13:30–14:30","SMT-1","NF-2 · Room 311 · W-4"]]
 };
-
 const holidays = {
-  "2026-08-26":"Milad-un-Nabi / Id-e-Milad",
-  "2026-09-04":"Janmashtami",
-  "2026-10-02":"Gandhi Jayanti",
-  "2026-10-20":"Dussehra",
-  "2026-11-08":"Diwali",
-  "2026-11-24":"Guru Nanak's Birthday",
-  "2026-12-25":"Christmas Day"
+  "2026-08-26":"Milad-un-Nabi / Id-e-Milad","2026-09-04":"Janmashtami","2026-10-02":"Gandhi Jayanti",
+  "2026-10-20":"Dussehra","2026-11-08":"Diwali","2026-11-24":"Guru Nanak's Birthday","2026-12-25":"Christmas Day"
 };
+const START=new Date("2026-08-17T00:00:00"), END=new Date("2027-01-31T00:00:00");
+const dayNames=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const monthNames=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+let attendance={};
+try{ attendance=JSON.parse(localStorage.getItem("eceAttendance")||"{}"); }catch(e){ attendance={}; }
+let selected=null;
 
-const START = new Date("2026-08-17T00:00:00");
-const END   = new Date("2027-01-31T00:00:00");
-
-let attendance = JSON.parse(localStorage.getItem("eceAttendance") || "{}");
-
-const dayNames = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-
-function key(date, index) {
-  return date.toISOString().slice(0,10) + "_" + index;
-}
-
-function dateStr(d) {
-  return d.toISOString().slice(0,10);
-}
-
-function prettyDate(d) {
-  return d.toLocaleDateString("en-IN", {
-    day:"2-digit",month:"short",year:"numeric"
-  });
-}
-
-function save() {
-  localStorage.setItem("eceAttendance", JSON.stringify(attendance));
-  renderStats();
-}
-
-function setAttendance(k, value) {
-  attendance[k] = value;
-  save();
-  render();
-}
-
-function periodFor(date) {
-  const s = dateStr(date);
-
-  if (s >= "2026-10-18" && s <= "2026-10-25")
-    return ["Autumn Vacation","vacation"];
-
-  if (s >= "2026-11-21" && s <= "2026-12-03")
-    return ["Preparation / Practical Exams","exam"];
-
-  if (s >= "2026-12-04" && s <= "2026-12-24")
-    return ["Theory Examinations","exam"];
-
-  if (s >= "2026-12-25" && s <= "2026-12-31")
-    return ["Winter Vacation","vacation"];
-
-  if (s >= "2027-01-01")
-    return ["Semester 2 begins — new timetable required","exam"];
-
+function dateStr(d){ return d.toISOString().slice(0,10); }
+function key(ds,i){ return ds+"_"+i; }
+function save(){ try{ localStorage.setItem("eceAttendance", JSON.stringify(attendance)); }catch(e){} }
+function periodFor(ds){
+  if(ds>="2026-10-18"&&ds<="2026-10-25") return ["Autumn Vacation","vacation"];
+  if(ds>="2026-11-21"&&ds<="2026-12-03") return ["Preparation / Practical Exams","exam"];
+  if(ds>="2026-12-04"&&ds<="2026-12-24") return ["Theory Examinations","exam"];
+  if(ds>="2026-12-25"&&ds<="2026-12-31") return ["Winter Vacation","vacation"];
+  if(ds>="2027-01-01") return ["Semester 2 begins — new timetable required","exam"];
   return null;
 }
-
-function getDates() {
-  const dates = [];
-  let d = new Date(START);
-
-  while (d <= END) {
-    dates.push(new Date(d));
-    d.setDate(d.getDate()+1);
-  }
-  return dates;
-}
-
-function classesFor(d) {
-  const day = d.getDay();
-  if (!schedule[day]) return [];
-  if (holidays[dateStr(d)]) return [];
-
-  const period = periodFor(d);
-
-  /* Semester-I teaching timetable ends after 20 Nov. */
-  if (dateStr(d) > "2026-11-20") return [];
-
+function classesFor(d,ds){
+  const day=d.getDay();
+  if(!schedule[day]) return [];
+  if(holidays[ds]) return [];
+  if(periodFor(ds)) return [];
+  if(ds>"2026-11-20") return [];
   return schedule[day];
 }
-
-function render() {
-  const root = document.getElementById("weeks");
-  root.innerHTML = "";
-
-  const dates = getDates();
-
-  /* Monday-based weeks */
-  let monday = new Date("2026-08-17T00:00:00");
-
-  while (monday <= END) {
-    const saturday = new Date(monday);
-    saturday.setDate(saturday.getDate()+5);
-
-    const week = document.createElement("section");
-    week.className = "week";
-
-    const weekNo =
-      Math.floor((monday-START)/(7*24*60*60*1000))+1;
-
-    week.innerHTML = `
-      <div class="weekhead">
-        <h2>Week ${weekNo} · ${prettyDate(monday)} – ${prettyDate(saturday)}</h2>
-        <span class="badge">Mon–Sat</span>
-      </div>
-      <div class="weekbody"></div>
-    `;
-
-    const body = week.querySelector(".weekbody");
-
-    for(let i=0;i<6;i++) {
-      const d = new Date(monday);
-      d.setDate(d.getDate()+i);
-
-      if(d > END) break;
-
-      const ds = dateStr(d);
-      const day = d.getDay();
-      const holiday = holidays[ds];
-      const period = periodFor(d);
-
-      const dayBox = document.createElement("div");
-      dayBox.className = "day";
-
-      let badge = "";
-      let badgeClass = "";
-
-      if(holiday) {
-        badge = holiday;
-        badgeClass = "holiday";
-      } else if(period) {
-        badge = period[0];
-        badgeClass = period[1];
-      } else {
-        badge = classesFor(d).length + " classes";
-      }
-
-      dayBox.innerHTML = `
-        <div class="dayhead">
-          <strong>${dayNames[day]} · ${prettyDate(d)}</strong>
-          <span class="badge ${badgeClass}">${badge}</span>
-        </div>
-      `;
-
-      if(holiday || period || !classesFor(d).length) {
-        const empty = document.createElement("div");
-        empty.className = "empty";
-
-        if(day === 0) {
-          empty.textContent = "Sunday — no classes";
-        } else if(holiday) {
-          empty.textContent = "Holiday — attendance is not counted.";
-        } else if(period) {
-          empty.textContent = period[0];
-        } else {
-          empty.textContent = "No scheduled classes.";
-        }
-
-        dayBox.appendChild(empty);
-      } else {
-        classesFor(d).forEach((c,index)=>{
-          const k = key(d,index);
-          const val = attendance[k] || "";
-
-          const row = document.createElement("div");
-          row.className = "classrow";
-
-          row.innerHTML = `
-            <div class="time">${c[0]}</div>
-            <div>
-              <div class="subject">${c[1]}</div>
-              <div class="details">${c[2]}</div>
-            </div>
-            <div class="actions">
-              <button class="present ${val==="P"?"active":""}"
-                onclick="setAttendance('${k}','P')">✓ Present</button>
-              <button class="absent ${val==="A"?"active":""}"
-                onclick="setAttendance('${k}','A')">✕ Absent</button>
-              <button class="na ${val==="N"?"active":""}"
-                onclick="setAttendance('${k}','N')">— N/H</button>
-            </div>
-          `;
-
-          dayBox.appendChild(row);
-        });
-      }
-
-      body.appendChild(dayBox);
-    }
-
-    root.appendChild(week);
-
-    monday.setDate(monday.getDate()+7);
-  }
-
-  renderStats();
+function getDates(){ const a=[]; let d=new Date(START); while(d<=END){ a.push(new Date(d)); d.setDate(d.getDate()+1);} return a; }
+function getAllClasses(){
+  const r=[];
+  getDates().forEach(d=>{ const ds=dateStr(d); classesFor(d,ds).forEach((c,i)=>{ r.push({ds,index:i,subject:c[1],status:attendance[key(ds,i)]||""}); }); });
+  return r;
+}
+function dayStatusClass(d,ds){
+  const day=d.getDay();
+  if(day===0) return "off-sun";
+  if(holidays[ds]) return "off-holiday";
+  const p=periodFor(ds); if(p) return "off-"+p[1];
+  if(ds>"2026-11-20") return "off-vacation";
+  const cs=classesFor(d,ds);
+  if(!cs.length) return "";
+  let p_=0,a_=0;
+  cs.forEach((c,i)=>{ const s=attendance[key(ds,i)]; if(s==="P")p_++; if(s==="A")a_++; });
+  if(a_>0) return "has-absent";
+  if(p_===cs.length) return "all-present";
+  if(p_>0) return "partial";
+  return "";
 }
 
-function getAllClasses() {
-  const result = [];
-
-  for(const d of getDates()) {
-    const cs = classesFor(d);
-
-    cs.forEach((c,index)=>{
-      result.push({
-        date:dateStr(d),
-        index,
-        subject:c[1],
-        time:c[0],
-        details:c[2],
-        status:attendance[key(d,index)] || ""
-      });
+function renderBubbles(){
+  const wrap=document.getElementById("bubbleWrap"); wrap.innerHTML="";
+  const todayDs=dateStr(new Date());
+  let lastMonth=null;
+  getDates().forEach(d=>{
+    const ds=dateStr(d);
+    if(d.getMonth()!==lastMonth){
+      lastMonth=d.getMonth();
+      const lbl=document.createElement("div"); lbl.className="monthlabel"; lbl.textContent=monthNames[lastMonth];
+      wrap.appendChild(lbl);
+    }
+    const b=document.createElement("button");
+    b.className="bubble "+dayStatusClass(d,ds);
+    b.id="b_"+ds;
+    if(ds===todayDs) b.classList.add("today");
+    b.innerHTML=`<span class="wd">${dayNames[d.getDay()]}</span><span class="dt">${d.getDate()}</span><i class="dot"></i>`;
+    b.onclick=()=>selectDay(ds);
+    wrap.appendChild(b);
+  });
+}
+function refreshBubble(ds){
+  const d=new Date(ds+"T00:00:00");
+  const el=document.getElementById("b_"+ds);
+  if(!el) return;
+  const wasToday=el.classList.contains("today"), wasSel=el.classList.contains("selected");
+  el.className="bubble "+dayStatusClass(d,ds);
+  if(wasToday) el.classList.add("today");
+  if(wasSel) el.classList.add("selected");
+}
+function selectDay(ds){
+  if(selected){ const prev=document.getElementById("b_"+selected); if(prev) prev.classList.remove("selected"); }
+  selected=ds;
+  const el=document.getElementById("b_"+ds); if(el){ el.classList.add("selected"); el.scrollIntoView({behavior:"smooth",inline:"center",block:"nearest"}); }
+  renderDetail(ds);
+}
+function renderDetail(ds){
+  const d=new Date(ds+"T00:00:00");
+  const card=document.getElementById("detailCard");
+  const full=d.toLocaleDateString("en-IN",{weekday:"long",day:"2-digit",month:"short",year:"numeric"});
+  let badge="", cls="";
+  if(d.getDay()===0){ badge="Sunday"; }
+  else if(holidays[ds]){ badge=holidays[ds]; cls="holiday"; }
+  else{ const p=periodFor(ds); if(p){ badge=p[0]; cls=p[1]; } else if(ds>"2026-11-20"){ badge="Semester 2 begins — new timetable required"; cls="exam"; } }
+  let html=`<div class="ddate">${full}</div>`;
+  if(badge) html+=`<div class="dbadge ${cls}">${badge}</div>`;
+  const cs=classesFor(d,ds);
+  if(!cs.length){
+    html+=`<div class="empty">${d.getDay()===0?"No classes on Sundays.":badge?"No classes — "+badge.toLowerCase()+".":"No scheduled classes."}</div>`;
+  }else{
+    cs.forEach((c,i)=>{
+      const k=key(ds,i), val=attendance[k]||"";
+      html+=`<div class="classrow">
+        <div class="cinfo"><div class="time">${c[0]}</div><div class="subject">${c[1]}</div><div class="details">${c[2]}</div></div>
+        <div class="actions">
+          <button class="present ${val==="P"?"active":""}" onclick="mark('${ds}',${i})">✓ Present</button>
+          <button class="absent ${val==="A"?"active":""}" onclick="markA('${ds}',${i})">✕ Absent</button>
+          <button class="na ${val==="N"?"active":""}" onclick="markN('${ds}',${i})">— N/H</button>
+        </div></div>`;
     });
   }
-
-  return result;
+  card.innerHTML=html;
 }
+function setMark(ds,i,val){ attendance[key(ds,i)]=val; save(); refreshBubble(ds); renderDetail(ds); renderStats(); }
+function mark(ds,i){ setMark(ds,i,"P"); }
+function markA(ds,i){ setMark(ds,i,"A"); }
+function markN(ds,i){ setMark(ds,i,"N"); }
 
-function renderStats() {
-  const all = getAllClasses();
-  const marked = all.filter(x=>x.status==="P" || x.status==="A");
-  const p = marked.filter(x=>x.status==="P").length;
-  const a = marked.filter(x=>x.status==="A").length;
-
-  const percent = marked.length
-    ? Math.round(p/marked.length*100)
-    : 0;
-
-  document.getElementById("overall").textContent = percent+"%";
-  document.getElementById("presentCount").textContent = p;
-  document.getElementById("absentCount").textContent = a;
-  document.getElementById("totalCount").textContent = marked.length;
-
-  const subjects = {};
-
-  all.forEach(x=>{
-    /* Remove practical group information for aggregation */
-    let name = x.subject.split(" — ")[0];
-
-    if(!subjects[name])
-      subjects[name]={p:0,a:0};
-
-    if(x.status==="P") subjects[name].p++;
-    if(x.status==="A") subjects[name].a++;
-  });
-
-  const box = document.getElementById("subjects");
-  box.innerHTML = "";
-
-  Object.entries(subjects).forEach(([name,v])=>{
-    const total=v.p+v.a;
-    const pct=total?Math.round(v.p/total*100):0;
-
-    const card=document.createElement("div");
-    card.className="subjectcard";
-
-    card.innerHTML=`
-      <b>${name}</b><br>
-      <small>${v.p} present · ${v.a} absent · ${total} marked</small>
-      <div class="progress"><i style="width:${pct}%"></i></div>
-      <small>${pct}% attendance</small>
-    `;
-
-    box.appendChild(card);
+function renderStats(){
+  const all=getAllClasses();
+  const marked=all.filter(x=>x.status==="P"||x.status==="A");
+  const p=marked.filter(x=>x.status==="P").length, a=marked.filter(x=>x.status==="A").length;
+  const pct=marked.length?Math.round(p/marked.length*100):0;
+  document.getElementById("overall").textContent=pct+"%";
+  document.getElementById("presentCount").textContent=p;
+  document.getElementById("absentCount").textContent=a;
+  document.getElementById("totalCount").textContent=marked.length;
+  const subs={};
+  all.forEach(x=>{ const name=x.subject.split(" — ")[0]; if(!subs[name]) subs[name]={p:0,a:0}; if(x.status==="P")subs[name].p++; if(x.status==="A")subs[name].a++; });
+  const box=document.getElementById("subjects"); box.innerHTML="";
+  Object.entries(subs).forEach(([name,v])=>{
+    const total=v.p+v.a, pc=total?Math.round(v.p/total*100):0;
+    const c=document.createElement("div"); c.className="subjectcard";
+    c.innerHTML=`<b>${name}</b><small>${v.p} present · ${v.a} absent · ${total} marked</small><div class="progress"><i style="width:${pc}%"></i></div><small>${pc}% attendance</small>`;
+    box.appendChild(c);
   });
 }
-
-function exportData() {
-  const blob = new Blob(
-    [JSON.stringify(attendance,null,2)],
-    {type:"application/json"}
-  );
-
-  const a=document.createElement("a");
-  a.href=URL.createObjectURL(blob);
-  a.download="ece-attendance-backup.json";
-  a.click();
-  URL.revokeObjectURL(a.href);
+function showTab(t){
+  document.getElementById("panelSchedule").classList.toggle("active",t==="schedule");
+  document.getElementById("panelSummary").classList.toggle("active",t==="summary");
+  document.getElementById("tabBtnSchedule").classList.toggle("active",t==="schedule");
+  document.getElementById("tabBtnSummary").classList.toggle("active",t==="summary");
 }
-
-function importData(e) {
-  const file=e.target.files[0];
-  if(!file)return;
-
+function goToday(){
+  let ds=dateStr(new Date());
+  if(ds<dateStr(START)) ds=dateStr(START);
+  if(ds>dateStr(END)) ds=dateStr(END);
+  showTab("schedule");
+  selectDay(ds);
+}
+function exportData(){
+  const blob=new Blob([JSON.stringify(attendance,null,2)],{type:"application/json"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="ece-attendance-backup.json"; a.click(); URL.revokeObjectURL(a.href);
+}
+function importData(e){
+  const file=e.target.files[0]; if(!file) return;
   const reader=new FileReader();
-
   reader.onload=()=>{
-    try {
-      attendance=JSON.parse(reader.result);
-      save();
-      render();
-      alert("Attendance backup imported.");
-    } catch {
-      alert("Invalid backup file.");
-    }
+    try{ attendance=JSON.parse(reader.result); save(); renderBubbles(); if(selected) renderDetail(selected); renderStats(); alert("Attendance backup imported."); }
+    catch(err){ alert("Invalid backup file."); }
   };
-
   reader.readAsText(file);
 }
-
-function clearData() {
-  if(confirm("Delete all attendance records?")) {
-    attendance={};
-    save();
-    render();
+function clearData(){
+  if(confirm("Delete all attendance records? This cannot be undone.")){
+    attendance={}; save(); renderBubbles(); if(selected) renderDetail(selected); renderStats();
   }
 }
-
-function goToday() {
-  const now = new Date();
-  const start = new Date(START);
-
-  let week=Math.floor((now-start)/(7*24*60*60*1000));
-  if(week<0)week=0;
-
-  const target=document.querySelectorAll(".week")[week];
-
-  if(target) {
-    target.scrollIntoView({behavior:"smooth"});
-  } else {
-    window.scrollTo({top:0,behavior:"smooth"});
-  }
-}
-
-render();
+renderBubbles();
+renderStats();
+goToday();
 </script>
 </body>
 </html>
