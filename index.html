@@ -110,6 +110,7 @@ h2{font-size:15px;margin:0 0 10px}
     <button onclick="window.print()">Print</button>
     <button onclick="exportData()">Export backup</button>
     <button onclick="document.getElementById('importFile').click()">Import backup</button>
+    <button onclick="undoLast()">Undo last import/reset</button>
     <button class="danger" onclick="clearData()">Reset</button>
     <input id="importFile" type="file" accept=".json" style="display:none" onchange="importData(event)">
   </div>
@@ -147,39 +148,34 @@ const holidays = {
 const START=new Date("2026-08-17T00:00:00"), END=new Date("2027-01-31T00:00:00");
 const dayNames=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 const monthNames=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const STORE="eceAttendance.v3", UNDO="eceAttendance.v3.undo";
+const OKSTATUS=["P","A","N"], DATE_RE=/^\d{4}-\d{2}-\d{2}$/, LEGACY_RE=/^(\d{4}-\d{2}-\d{2})_(\d+)$/;
 let attendance={};
-try{ attendance=JSON.parse(localStorage.getItem("eceAttendance")||"{}"); }catch(e){ attendance={}; }
-
-// One-time repair for data created by the old UTC-based date code.
-// The old code stored a selected local date as the previous calendar date in India.
-const DATE_FIX_VERSION="2";
-if(localStorage.getItem("eceDateFixVersion")!==DATE_FIX_VERSION){
-  const repaired={};
-  Object.entries(attendance).forEach(([k,v])=>{
-    const m=k.match(/^(\d{4}-\d{2}-\d{2})_(\d+)$/);
-    if(!m || !["P","A","N"].includes(v)) return;
-    repaired[shiftDate(m[1],1)+"_"+m[2]]=v;
-  });
-  attendance=repaired;
-  save();
-  localStorage.setItem("eceDateFixVersion",DATE_FIX_VERSION);
+{
+  const st=readJSON(STORE);
+  if(st&&st.v===3&&st.marks&&typeof st.marks==="object"){ attendance=st.marks; }
+  else{
+    // First run of this version: convert the old position-based store. The old copy is left untouched as a safety net.
+    const old=readJSON("eceAttendance")||{};
+    const shift=readRaw("eceDateFixVersion")==="2"?0:(detectShift(old)??1);
+    attendance=convertLegacy(old,shift); save();
+  }
 }
 let selected=null;
 
-function dateStr(d){
-  const y=d.getFullYear();
-  const m=String(d.getMonth()+1).padStart(2,"0");
-  const day=String(d.getDate()).padStart(2,"0");
-  return `${y}-${m}-${day}`;
-}
+// Local calendar dates only (never UTC), so a date always means the day you tapped.
+function dateStr(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
 function dateFromStr(ds){ return new Date(ds+"T12:00:00"); }
-function shiftDate(ds,days){
-  const d=dateFromStr(ds);
-  d.setDate(d.getDate()+days);
-  return dateStr(d);
-}
-function key(ds,i){ return ds+"_"+i; }
-function save(){ try{ localStorage.setItem("eceAttendance", JSON.stringify(attendance)); }catch(e){} }
+function shiftDate(ds,days){ const d=dateFromStr(ds); d.setDate(d.getDate()+days); return dateStr(d); }
+// A mark is stored under the class itself (date|time|subject), never by list position, so timetable edits can't move it.
+function key(ds,i){ const c=classesFor(dateFromStr(ds),ds)[i]; return c? ds+"|"+c[0]+"|"+c[1] : ds+"|#"+i; }
+function parseKey(k){ const p=k.split("|"); if(!DATE_RE.test(p[0])) return null; if(p[1]&&p[1][0]==="#") return {date:p[0],time:"",subject:"",period:+p[1].slice(1)+1}; if(p.length<3) return null; return {date:p[0],time:p[1],subject:p.slice(2).join("|"),period:0}; }
+function readRaw(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+function readJSON(k){ try{ return JSON.parse(readRaw(k)||"null"); }catch(e){ return null; } }
+function legacyFit(o,shift){ let bad=0; Object.entries(o).forEach(([k,v])=>{ const m=k.match(LEGACY_RE); if(!m||!OKSTATUS.includes(v)) return; const ds=shiftDate(m[1],shift); if(!classesFor(dateFromStr(ds),ds)[+m[2]]) bad++; }); return bad; }
+function detectShift(o){ const a=legacyFit(o,0), b=legacyFit(o,1); return (!a&&b)?0:(a&&!b)?1:null; }
+function convertLegacy(o,shift){ const out={}; Object.entries(o).forEach(([k,v])=>{ const m=k.match(LEGACY_RE); if(m&&OKSTATUS.includes(v)) out[key(shiftDate(m[1],shift),+m[2])]=v; }); return out; }
+function save(){ try{ localStorage.setItem(STORE, JSON.stringify({v:3,marks:attendance})); }catch(e){} }
 function periodFor(ds){
   if(ds>="2026-10-18"&&ds<="2026-10-25") return ["Autumn Vacation","vacation"];
   if(ds>="2026-11-21"&&ds<="2026-12-03") return ["Preparation / Practical Exams","exam"];
@@ -317,73 +313,69 @@ function goToday(){
   showTab("schedule");
   selectDay(ds);
 }
-function exportData(){
-  // Export exactly what is marked, with the real calendar date and class attached.
-  const records=[];
+function backupRecords(){
+  const rows=[];
   Object.entries(attendance).forEach(([k,status])=>{
-    if(!["P","A","N"].includes(status)) return;
-    const m=k.match(/^(\d{4}-\d{2}-\d{2})_(\d+)$/);
-    if(!m) return;
-    const ds=m[1], index=Number(m[2]), d=dateFromStr(ds), classes=classesFor(d,ds);
-    const c=classes[index];
-    records.push({
-      date:ds,
-      day:dayNames[d.getDay()],
-      period:index+1,
-      time:c?.[0]||"",
-      subject:c?.[1]||"",
-      details:c?.[2]||"",
-      status
-    });
+    const r=parseKey(k); if(!r||!OKSTATUS.includes(status)) return;
+    const d=dateFromStr(r.date), cs=classesFor(d,r.date);
+    const idx=r.period?r.period-1:cs.findIndex(c=>c[0]===r.time&&c[1]===r.subject);
+    rows.push({date:r.date,day:dayNames[d.getDay()],period:idx+1,time:r.time,subject:r.subject,details:(cs[idx]||[])[2]||"",status});
   });
-  records.sort((a,b)=>a.date.localeCompare(b.date)||a.period-b.period);
-  const payload={
-    formatVersion:2,
-    exportedAt:new Date().toISOString(),
-    records
-  };
+  return rows.sort((a,b)=>a.date.localeCompare(b.date)||a.time.localeCompare(b.time)||a.subject.localeCompare(b.subject));
+}
+function exportData(){
+  const records=backupRecords();
+  if(!records.length){ alert("Nothing to export yet: no attendance has been marked."); return; }
+  const payload={app:"ece-attendance",formatVersion:3,exportedAt:new Date().toISOString(),count:records.length,records};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement("a");
-  a.href=url; a.download="ece-attendance-backup.json"; a.click();
+  const url=URL.createObjectURL(blob), a=document.createElement("a");
+  a.href=url; a.download="ece-attendance-"+dateStr(new Date())+".json"; document.body.appendChild(a); a.click(); a.remove();
   setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
+function parseBackup(p){
+  const marks={}; let skipped=0;
+  if(p&&Array.isArray(p.records)&&p.formatVersion>=2){
+    if(p.count!==undefined&&p.count!==p.records.length) throw new Error("count mismatch");
+    p.records.forEach(r=>{
+      if(!r||!DATE_RE.test(r.date)||!OKSTATUS.includes(r.status)){ skipped++; return; }
+      if(r.time&&r.subject) marks[r.date+"|"+r.time+"|"+r.subject]=r.status;
+      else if(Number.isInteger(r.period)&&r.period>0) marks[key(r.date,r.period-1)]=r.status;
+      else skipped++;
+    });
+  }else if(p&&typeof p==="object"&&!Array.isArray(p)){
+    // Old un-versioned backup: work out from the timetable whether its dates were saved one day early.
+    let shift=detectShift(p);
+    if(shift===null) shift=confirm("This is an old-format backup and its dates can't be checked automatically.\n\nOK = dates are correct as they are.\nCancel = dates are one day early (made by the old buggy version).")?0:1;
+    Object.assign(marks,convertLegacy(p,shift));
+  }else throw new Error("format");
+  return {marks,skipped};
+}
 function importData(e){
-  const file=e.target.files[0]; if(!file) return;
+  const file=e.target.files[0]; e.target.value=""; if(!file) return;
   const reader=new FileReader();
   reader.onload=()=>{
     try{
-      const parsed=JSON.parse(reader.result);
-      let imported={};
-
-      if(parsed && parsed.formatVersion===2 && Array.isArray(parsed.records)){
-        parsed.records.forEach(r=>{
-          if(/^\d{4}-\d{2}-\d{2}$/.test(r.date) && Number.isInteger(r.period) && ["P","A","N"].includes(r.status)){
-            imported[key(r.date,r.period-1)]=r.status;
-          }
-        });
-      }else if(parsed && typeof parsed==="object" && !Array.isArray(parsed)){
-        // Legacy exports from the broken UTC version: repair their dates once on import.
-        Object.entries(parsed).forEach(([k,v])=>{
-          const m=k.match(/^(\d{4}-\d{2}-\d{2})_(\d+)$/);
-          if(m && ["P","A","N"].includes(v)) imported[shiftDate(m[1],1)+"_"+m[2]]=v;
-        });
-      }else{ throw new Error("Invalid format"); }
-
-      attendance=imported;
-      save();
-      localStorage.setItem("eceDateFixVersion",DATE_FIX_VERSION);
-      renderBubbles();
-      if(selected) renderDetail(selected);
-      renderStats();
-      alert("Attendance backup imported correctly.");
-    }catch(err){ alert("Invalid attendance backup file."); }
+      const {marks,skipped}=parseBackup(JSON.parse(reader.result));
+      const ks=Object.keys(marks); if(!ks.length) throw new Error("empty");
+      let add=0,diff=0,same=0;
+      ks.forEach(k=>{ if(!(k in attendance)) add++; else if(attendance[k]!==marks[k]) diff++; else same++; });
+      if(!confirm(`Backup contains ${ks.length} marks: ${add} new, ${diff} differ from your current mark (backup wins), ${same} already match.${skipped?` ${skipped} unreadable entries skipped.`:""}\n\nMerge into your data? Nothing you have marked is deleted.`)) return;
+      snap(); Object.assign(attendance,marks); save();
+      renderBubbles(); renderStats(); if(selected) selectDay(selected);
+      alert("Imported. Use \"Undo last import/reset\" if this wasn't what you wanted.");
+    }catch(err){ alert("This file isn't a valid attendance backup, so nothing was changed."); }
   };
   reader.readAsText(file);
 }
+function snap(){ try{ localStorage.setItem(UNDO,JSON.stringify(attendance)); }catch(e){} }
+function undoLast(){
+  const u=readJSON(UNDO); if(!u){ alert("Nothing to undo."); return; }
+  if(!confirm("Restore your attendance to how it was just before the last import or reset?")) return;
+  attendance=u; save(); renderBubbles(); renderStats(); if(selected) selectDay(selected);
+}
 function clearData(){
-  if(confirm("Delete all attendance records? This cannot be undone.")){
-    attendance={}; save(); renderBubbles(); if(selected) renderDetail(selected); renderStats();
+  if(confirm("Delete all attendance records?\n\nExport a backup first, or use \"Undo last import/reset\" right after if this was a mistake.")){
+    snap(); attendance={}; save(); renderBubbles(); renderStats(); if(selected) selectDay(selected);
   }
 }
 renderBubbles();
