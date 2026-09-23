@@ -3,2059 +3,392 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-
 <title>ECE Semester 1 Attendance</title>
-
 <style>
 :root{
-  --bg:#f5f7fb;
-  --card:#ffffff;
-  --card2:#eef1f8;
-  --border:#dfe5f2;
-  --text:#12162a;
-  --muted:#5b6780;
-  --accent:#3260e8;
-  --present:#128a4c;
-  --absent:#d81e3f;
-  --na:#6b7690;
-  --holiday:#a35d09;
-  --holidaybg:#fdf0dc;
-  --vacation:#2454c9;
-  --vacationbg:#e7eefb;
-  --exam:#b01248;
-  --exambg:#fbe5ec;
-  box-sizing:border-box;
-  padding-top:env(safe-area-inset-top,0px);
-  padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#f5f7fb;--card:#ffffff;--card2:#eef1f8;--border:#dfe5f2;--text:#12162a;--muted:#5b6780;
+  --accent:#3260e8;--present:#128a4c;--absent:#d81e3f;--na:#6b7690;
+  --holiday:#a35d09;--holidaybg:#fdf0dc;--vacation:#2454c9;--vacationbg:#e7eefb;--exam:#b01248;--exambg:#fbe5ec;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
 }
-
 @media(prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
-    --bg:#0b0f1c;
-    --card:#131a2c;
-    --card2:#1a2338;
-    --border:#28324c;
-    --text:#e9edf7;
-    --muted:#8b96b3;
-    --accent:#5b8cff;
-    --present:#2fbf71;
-    --absent:#f0475c;
-    --na:#8b96b3;
-    --holiday:#e0a63c;
-    --holidaybg:rgba(224,166,60,.14);
-    --vacation:#5b9dff;
-    --vacationbg:rgba(91,157,255,.14);
-    --exam:#f0577a;
-    --exambg:rgba(240,87,122,.14);
+    --bg:#0b0f1c;--card:#131a2c;--card2:#1a2338;--border:#28324c;--text:#e9edf7;--muted:#8b96b3;
+    --accent:#5b8cff;--present:#2fbf71;--absent:#f0475c;--na:#8b96b3;
+    --holiday:#e0a63c;--holidaybg:rgba(224,166,60,.14);--vacation:#5b9dff;--vacationbg:rgba(91,157,255,.14);
+    --exam:#f0577a;--exambg:rgba(240,87,122,.14);
   }
 }
-
 :root[data-theme="dark"]{
-  --bg:#0b0f1c;
-  --card:#131a2c;
-  --card2:#1a2338;
-  --border:#28324c;
-  --text:#e9edf7;
-  --muted:#8b96b3;
-  --accent:#5b8cff;
-  --present:#2fbf71;
-  --absent:#f0475c;
-  --na:#8b96b3;
-  --holiday:#e0a63c;
-  --holidaybg:rgba(224,166,60,.14);
-  --vacation:#5b9dff;
-  --vacationbg:rgba(91,157,255,.14);
-  --exam:#f0577a;
-  --exambg:rgba(240,87,122,.14);
-}
-
-html{
-  scroll-padding-top:env(safe-area-inset-top,0px);
-}
-
-*{
-  box-sizing:border-box;
-}
-
-body{
-  margin:0;
-  background:var(--bg);
-  color:var(--text);
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,system-ui,sans-serif;
-}
-
-header{
-  position:sticky;
-  top:0;
-  z-index:10;
-  background:var(--bg);
-  border-bottom:1px solid var(--border);
-  padding:calc(14px + env(safe-area-inset-top,0px)) 5% 12px;
-}
-
-h1{
-  margin:0;
-  font-size:20px;
-  letter-spacing:-.01em;
-}
-
-.subtitle{
-  color:var(--muted);
-  font-size:13px;
-  margin-top:3px;
-}
-
-.tabs{
-  display:flex;
-  gap:6px;
-  margin-top:14px;
-}
-
-.tabbtn{
-  flex:1;
-  padding:10px 8px;
-  border-radius:10px;
-  border:1px solid var(--border);
-  background:var(--card2);
-  color:var(--text);
-  font-size:14px;
-  font-weight:600;
-  cursor:pointer;
-}
-
-.tabbtn.active{
-  background:var(--accent);
-  border-color:var(--accent);
-  color:#fff;
-}
-
-.toolbar{
-  display:flex;
-  gap:8px;
-  flex-wrap:wrap;
-  margin-top:10px;
-}
-
-.toolbar button{
-  border:1px solid var(--border);
-  background:var(--card);
-  color:var(--text);
-  padding:7px 11px;
-  border-radius:8px;
-  font-size:12.5px;
-  cursor:pointer;
-}
-
-.toolbar button:hover{
-  filter:brightness(1.08);
-}
-
-.toolbar .danger{
-  color:var(--absent);
-  border-color:var(--absent);
-}
-
-main{
-  max-width:960px;
-  margin:0 auto;
-  padding:16px 5% 60px;
-}
-
-.panel{
-  display:none;
-}
-
-.panel.active{
-  display:block;
-}
-
-/* DAY BUBBLES */
-
-.bubblewrap{
-  display:flex;
-  gap:8px;
-  overflow-x:auto;
-  scroll-snap-type:x proximity;
-  -webkit-overflow-scrolling:touch;
-  padding:4px 2px 16px;
-  margin-bottom:6px;
-}
-
-.bubblewrap::-webkit-scrollbar{
-  height:6px;
-}
-
-.bubblewrap::-webkit-scrollbar-thumb{
-  background:var(--border);
-  border-radius:6px;
-}
-
-.monthlabel{
-  flex:0 0 auto;
-  display:flex;
-  align-items:center;
-  color:var(--muted);
-  font-size:11px;
-  font-weight:600;
-  padding:0 4px;
-  white-space:nowrap;
-}
-
-.bubble{
-  scroll-snap-align:center;
-  flex:0 0 auto;
-  width:52px;
-  height:66px;
-  border-radius:16px;
-  border:1px solid var(--border);
-  background:var(--card);
-  color:var(--text);
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  gap:2px;
-  cursor:pointer;
-  position:relative;
-}
-
-.bubble .wd{
-  font-size:11px;
-  color:var(--muted);
-}
-
-.bubble .dt{
-  font-size:17px;
-  font-weight:700;
-}
-
-.bubble .dot{
-  position:absolute;
-  bottom:7px;
-  width:6px;
-  height:6px;
-  border-radius:50%;
-  background:transparent;
-}
-
-.bubble.today{
-  border-color:var(--accent);
-  border-width:2px;
-}
-
-.bubble.selected{
-  background:var(--accent);
-  border-color:var(--accent);
-}
-
-.bubble.selected .wd,
-.bubble.selected .dt{
-  color:#fff;
-}
-
-.bubble.off-holiday{
-  background:var(--holidaybg);
-  border-color:var(--holiday);
-}
-
-.bubble.off-vacation{
-  background:var(--vacationbg);
-  border-color:var(--vacation);
-}
-
-.bubble.off-exam{
-  background:var(--exambg);
-  border-color:var(--exam);
-}
-
-.bubble.off-sun{
-  opacity:.45;
-}
-
-.bubble.all-present .dot{
-  background:var(--present);
-}
-
-.bubble.has-absent .dot{
-  background:var(--absent);
-}
-
-.bubble.partial .dot{
-  background:var(--holiday);
-}
-
-/* DETAIL */
-
-.detailcard{
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:16px;
-  padding:16px;
-}
-
-.ddate{
-  font-size:16px;
-  font-weight:700;
-}
-
-.dbadge{
-  display:inline-block;
-  margin-top:6px;
-  font-size:12px;
-  padding:4px 10px;
-  border-radius:999px;
-  background:var(--card2);
-  color:var(--muted);
-}
-
-.dbadge.holiday{
-  background:var(--holidaybg);
-  color:var(--holiday);
-}
-
-.dbadge.vacation{
-  background:var(--vacationbg);
-  color:var(--vacation);
-}
-
-.dbadge.exam{
-  background:var(--exambg);
-  color:var(--exam);
-}
-
-.empty{
-  padding:16px 0;
-  color:var(--muted);
-  font-size:14px;
-}
-
-.classrow{
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
-  align-items:center;
-  justify-content:space-between;
-  padding:12px 0;
-  border-top:1px solid var(--border);
-}
-
-.classrow:first-of-type{
-  border-top:1px solid var(--border);
-  margin-top:12px;
-}
-
-.cinfo .time{
-  color:var(--accent);
-  font-size:12.5px;
-  font-weight:600;
-}
-
-.cinfo .subject{
-  font-weight:700;
-  font-size:15px;
-  margin-top:1px;
-}
-
-.cinfo .details{
-  font-size:12px;
-  color:var(--muted);
-  margin-top:2px;
-}
-
-.actions{
-  display:flex;
-  gap:6px;
-}
-
-.actions button{
-  padding:8px 10px;
-  border-radius:9px;
-  border:1px solid var(--border);
-  background:var(--card2);
-  color:var(--text);
-  font-size:12px;
-  cursor:pointer;
-}
-
-.present.active{
-  background:var(--present);
-  border-color:var(--present);
-  color:#fff;
-}
-
-.absent.active{
-  background:var(--absent);
-  border-color:var(--absent);
-  color:#fff;
-}
-
-.na.active{
-  background:var(--na);
-  border-color:var(--na);
-  color:#fff;
-}
-
-/* SUMMARY */
-
-.stats{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:10px;
-  margin-bottom:20px;
-}
-
-.stat{
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:14px;
-  padding:14px;
-}
-
-.stat b{
-  font-size:22px;
-  display:block;
-}
-
-.stat span{
-  color:var(--muted);
-  font-size:12px;
-}
-
-.subjects{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:10px;
-}
-
-.subjectcard{
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:13px;
-  padding:13px;
-}
-
-.subjectcard b{
-  font-size:14px;
-}
-
-.subjectcard small{
-  color:var(--muted);
-  display:block;
-  margin-top:3px;
-  font-size:11.5px;
-}
-
-.progress{
-  height:6px;
-  background:var(--card2);
-  border-radius:20px;
-  margin-top:8px;
-  overflow:hidden;
-}
-
-.progress i{
-  display:block;
-  height:100%;
-  background:var(--present);
-}
-
-h2{
-  font-size:15px;
-  margin:0 0 10px;
-}
-
-@media(max-width:700px){
-
-  .stats{
-    grid-template-columns:repeat(2,1fr);
-  }
-
-  .subjects{
-    grid-template-columns:1fr 1fr;
-  }
-
-}
-
-@media(max-width:480px){
-
-  .subjects{
-    grid-template-columns:1fr;
-  }
-
-}
+  --bg:#0b0f1c;--card:#131a2c;--card2:#1a2338;--border:#28324c;--text:#e9edf7;--muted:#8b96b3;
+  --accent:#5b8cff;--present:#2fbf71;--absent:#f0475c;--na:#8b96b3;
+  --holiday:#e0a63c;--holidaybg:rgba(224,166,60,.14);--vacation:#5b9dff;--vacationbg:rgba(91,157,255,.14);
+  --exam:#f0577a;--exambg:rgba(240,87,122,.14);
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,system-ui,sans-serif}
+header{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--border);padding:calc(14px + env(safe-area-inset-top,0px)) 5% 12px}
+h1{margin:0;font-size:20px;letter-spacing:-.01em}
+.subtitle{color:var(--muted);font-size:13px;margin-top:3px}
+.tabs{display:flex;gap:6px;margin-top:14px}
+.tabbtn{flex:1;padding:10px 8px;border-radius:10px;border:1px solid var(--border);background:var(--card2);color:var(--text);font-size:14px;font-weight:600;cursor:pointer}
+.tabbtn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.toolbar button{border:1px solid var(--border);background:var(--card);color:var(--text);padding:7px 11px;border-radius:8px;font-size:12.5px;cursor:pointer}
+.toolbar button:hover{filter:brightness(1.08)}
+.toolbar .danger{color:var(--absent);border-color:var(--absent)}
+main{max-width:960px;margin:0 auto;padding:16px 5% 60px}
+.panel{display:none}
+.panel.active{display:block}
+
+/* ---- day bubbles ---- */
+.bubblewrap{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;padding:4px 2px 16px;margin-bottom:6px}
+.bubblewrap::-webkit-scrollbar{height:6px}
+.bubblewrap::-webkit-scrollbar-thumb{background:var(--border);border-radius:6px}
+.monthlabel{flex:0 0 auto;display:flex;align-items:center;color:var(--muted);font-size:11px;font-weight:600;padding:0 4px;white-space:nowrap}
+.bubble{scroll-snap-align:center;flex:0 0 auto;width:52px;height:66px;border-radius:16px;border:1px solid var(--border);background:var(--card);color:var(--text);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;position:relative}
+.bubble .wd{font-size:11px;color:var(--muted)}
+.bubble .dt{font-size:17px;font-weight:700}
+.bubble .dot{position:absolute;bottom:7px;width:6px;height:6px;border-radius:50%;background:transparent}
+.bubble.today{border-color:var(--accent);border-width:2px}
+.bubble.selected{background:var(--accent);border-color:var(--accent)}
+.bubble.selected .wd,.bubble.selected .dt{color:#fff}
+.bubble.off-holiday{background:var(--holidaybg);border-color:var(--holiday)}
+.bubble.off-vacation{background:var(--vacationbg);border-color:var(--vacation)}
+.bubble.off-exam{background:var(--exambg);border-color:var(--exam)}
+.bubble.off-sun{opacity:.45}
+.bubble.all-present .dot{background:var(--present)}
+.bubble.has-absent .dot{background:var(--absent)}
+.bubble.partial .dot{background:var(--holiday)}
+
+/* ---- detail panel ---- */
+.detailcard{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px}
+.ddate{font-size:16px;font-weight:700}
+.dbadge{display:inline-block;margin-top:6px;font-size:12px;padding:4px 10px;border-radius:999px;background:var(--card2);color:var(--muted)}
+.dbadge.holiday{background:var(--holidaybg);color:var(--holiday)}
+.dbadge.vacation{background:var(--vacationbg);color:var(--vacation)}
+.dbadge.exam{background:var(--exambg);color:var(--exam)}
+.empty{padding:16px 0;color:var(--muted);font-size:14px}
+.classrow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:12px 0;border-top:1px solid var(--border)}
+.classrow:first-of-type{border-top:1px solid var(--border);margin-top:12px}
+.cinfo .time{color:var(--accent);font-size:12.5px;font-weight:600}
+.cinfo .subject{font-weight:700;font-size:15px;margin-top:1px}
+.cinfo .details{font-size:12px;color:var(--muted);margin-top:2px}
+.actions{display:flex;gap:6px}
+.actions button{padding:8px 10px;border-radius:9px;border:1px solid var(--border);background:var(--card2);color:var(--text);font-size:12px;cursor:pointer}
+.present.active{background:var(--present);border-color:var(--present);color:#fff}
+.absent.active{background:var(--absent);border-color:var(--absent);color:#fff}
+.na.active{background:var(--na);border-color:var(--na);color:#fff}
+
+/* ---- summary tab ---- */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px}
+.stat b{font-size:22px;display:block}
+.stat span{color:var(--muted);font-size:12px}
+.subjects{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.subjectcard{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:13px}
+.subjectcard b{font-size:14px}
+.subjectcard small{color:var(--muted);display:block;margin-top:3px;font-size:11.5px}
+.progress{height:6px;background:var(--card2);border-radius:20px;margin-top:8px;overflow:hidden}
+.progress i{display:block;height:100%;background:var(--present)}
+h2{font-size:15px;margin:0 0 10px}
+@media(max-width:700px){.stats{grid-template-columns:repeat(2,1fr)}.subjects{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){.subjects{grid-template-columns:1fr}}
 </style>
 </head>
-
 <body>
-
 <header>
-
-<h1>ECE 2 — Semester 1 Attendance</h1>
-
-<div class="subtitle">
-Aug–Dec 2026 · Tap a date to mark attendance
-</div>
-
-<div class="tabs">
-
-<button
-class="tabbtn active"
-id="tabBtnSchedule"
-onclick="showTab('schedule')">
-📅 Schedule
-</button>
-
-<button
-class="tabbtn"
-id="tabBtnSummary"
-onclick="showTab('summary')">
-📊 Attendance
-</button>
-
-</div>
-
-<div class="toolbar">
-
-<button onclick="goToday()">
-Jump to today
-</button>
-
-<button onclick="window.print()">
-Print
-</button>
-
-<button onclick="exportData()">
-Export backup
-</button>
-
-<button onclick="document.getElementById('importFile').click()">
-Import backup
-</button>
-
-<button
-class="danger"
-onclick="clearData()">
-Reset
-</button>
-
-<input
-id="importFile"
-type="file"
-accept=".json"
-style="display:none"
-onchange="importData(event)"
->
-
-</div>
-
+  <h1>ECE 2 — Semester 1 Attendance</h1>
+  <div class="subtitle">Aug–Dec 2026 · Tap a date to mark attendance</div>
+  <div class="tabs">
+    <button class="tabbtn active" id="tabBtnSchedule" onclick="showTab('schedule')">📅 Schedule</button>
+    <button class="tabbtn" id="tabBtnSummary" onclick="showTab('summary')">📊 Attendance</button>
+  </div>
+  <div class="toolbar">
+    <button onclick="goToday()">Jump to today</button>
+    <button onclick="window.print()">Print</button>
+    <button onclick="exportData()">Export backup</button>
+    <button onclick="document.getElementById('importFile').click()">Import backup</button>
+    <button class="danger" onclick="clearData()">Reset</button>
+    <input id="importFile" type="file" accept=".json" style="display:none" onchange="importData(event)">
+  </div>
 </header>
-
-
 <main>
-
-<section
-id="panelSchedule"
-class="panel active">
-
-<div
-class="bubblewrap"
-id="bubbleWrap">
-</div>
-
-<div
-class="detailcard"
-id="detailCard">
-</div>
-
-</section>
-
-
-<section
-id="panelSummary"
-class="panel">
-
-<h2>Overall</h2>
-
-<div class="stats">
-
-<div class="stat">
-<b id="overall">0%</b>
-<span>Attendance</span>
-</div>
-
-<div class="stat">
-<b id="presentCount">0</b>
-<span>Present</span>
-</div>
-
-<div class="stat">
-<b id="absentCount">0</b>
-<span>Absent</span>
-</div>
-
-<div class="stat">
-<b id="totalCount">0</b>
-<span>Marked</span>
-</div>
-
-</div>
-
-
-<h2>By subject</h2>
-
-<div
-id="subjects"
-class="subjects">
-</div>
-
-</section>
-
+  <section id="panelSchedule" class="panel active">
+    <div class="bubblewrap" id="bubbleWrap"></div>
+    <div class="detailcard" id="detailCard"></div>
+  </section>
+  <section id="panelSummary" class="panel">
+    <h2>Overall</h2>
+    <div class="stats">
+      <div class="stat"><b id="overall">0%</b><span>Attendance</span></div>
+      <div class="stat"><b id="presentCount">0</b><span>Present</span></div>
+      <div class="stat"><b id="absentCount">0</b><span>Absent</span></div>
+      <div class="stat"><b id="totalCount">0</b><span>Marked</span></div>
+    </div>
+    <h2>By subject</h2>
+    <div id="subjects" class="subjects"></div>
+  </section>
 </main>
-
-
 <script>
-
-/* ==========================================================
-   SCHEDULE
-
-   getDay():
-
-   0 = Sunday
-   1 = Monday
-   2 = Tuesday
-   3 = Wednesday
-   4 = Thursday
-   5 = Friday
-   6 = Saturday
-   ========================================================== */
-
 const schedule = {
-
-1:[
-["08:00–09:00","DECO — Practical (G1)","NS, SR · Room 213"],
-["08:00–09:00","EP-1 — Practical (G2)","ADK · Room 219"],
-["10:00–11:00","PPS","JS · Room 404"],
-["11:00–12:00","EP-1","AD · Room 404"],
-["12:30–13:30","EG — Practical (G2)","JK, RS · Room 606"],
-["13:30–14:30","EVS — Practical (G1)","SC, SD · Room 04"]
-],
-
-2:[
-["08:00–09:00","DECO","NS-1 · Room 404"],
-["09:00–10:00","SMT-1","NF-2 · Room 404"],
-["10:00–11:00","EM","BPS · Room 404"],
-["11:00–12:00","CS","AD-2 · Room 404"],
-["12:30–13:30","PPS","JS · Room 404"]
-],
-
-3:[
-["08:00–09:00","EVS","SC · Room 404"],
-["09:00–10:00","PPS","JS · Room 404"],
-["10:00–11:00","SMT-1","NF-2 · Room 404"],
-["11:00–12:00","DECO","NS-1 · Room 404"],
-["12:30–13:30","EM","BPS · Room 404"]
-],
-
-4:[
-["08:00–09:00","EM","BPS · Room 302"],
-["09:00–10:00","EVS","SC · Room 302"],
-["10:00–11:00","DECO","NS-1 · Room 302"],
-["11:00–12:00","EP-1","AD · Room 302"]
-],
-
-5:[
-["08:00–10:00","EVS — Practical (G1)","SC, SD · Room 04"],
-["08:00–10:00","EP-1 — Practical (G1)","AD, AK · Room 219"],
-["10:00–11:00","EP-1","AD · Room 311"],
-["11:00–12:00","CS","AD-2 · Room 311"],
-["12:30–13:30","DECO — Practical (G2)","NS, SR · Room 214"],
-["13:30–14:30","PPS — Practical (G1)","PK, NF-1 · Room 106A"]
-],
-
-6:[
-["08:00–10:00","EG — Practical (G1)","JK, RS · Room 606 · W-1"],
-["08:00–10:00","PPS — Practical (G2)","PS, NF-2 · Room 102 · W-1"],
-["10:00–11:00","CS","AD-2 · Room 510"],
-["11:00–12:00","SMT-1","NF-2 · Room 510"],
-["12:30–13:30","CS","AD-2 · Room 311 · W-4"],
-["13:30–14:30","SMT-1","NF-2 · Room 311 · W-4"]
-]
-
+  1:[["08:00–09:00","DECO — Practical (G1)","NS, SR · Room 213"],["08:00–09:00","EP-1 — Practical (G2)","ADK · Room 219"],["10:00–11:00","PPS","JS · Room 404"],["11:00–12:00","EP-1","AD · Room 404"],["12:30–13:30","EG — Practical (G2)","JK, RS · Room 606"],["13:30–14:30","EVS — Practical (G1)","SC, SD · Room 04"]],
+  2:[["08:00–09:00","DECO","NS-1 · Room 404"],["09:00–10:00","SMT-1","NF-2 · Room 404"],["10:00–11:00","EM","BPS · Room 404"],["11:00–12:00","CS","AD-2 · Room 404"],["12:30–13:30","PPS","JS · Room 404"]],
+  3:[["08:00–09:00","EVS","SC · Room 404"],["09:00–10:00","PPS","JS · Room 404"],["10:00–11:00","SMT-1","NF-2 · Room 404"],["11:00–12:00","DECO","NS-1 · Room 404"],["12:30–13:30","EM","BPS · Room 404"]],
+  4:[["08:00–09:00","EM","BPS · Room 302"],["09:00–10:00","EVS","SC · Room 302"],["10:00–11:00","DECO","NS-1 · Room 302"],["11:00–12:00","EP-1","AD · Room 302"]],
+  5:[["08:00–10:00","EVS — Practical (G1)","SC, SD · Room 04"],["08:00–10:00","EP-1 — Practical (G1)","AD, AK · Room 219"],["10:00–11:00","EP-1","AD · Room 311"],["11:00–12:00","CS","AD-2 · Room 311"],["12:30–13:30","DECO — Practical (G2)","NS, SR · Room 214"],["13:30–14:30","PPS — Practical (G1)","PK, NF-1 · Room 106A"]],
+  6:[["08:00–10:00","EG — Practical (G1)","JK, RS · Room 606 · W-1"],["08:00–10:00","PPS — Practical (G2)","PS, NF-2 · Room 102 · W-1"],["10:00–11:00","CS","AD-2 · Room 510"],["11:00–12:00","SMT-1","NF-2 · Room 510"],["12:30–13:30","CS","AD-2 · Room 311 · W-4"],["13:30–14:30","SMT-1","NF-2 · Room 311 · W-4"]]
 };
-
-
-/* ==========================================================
-   HOLIDAYS
-   ========================================================== */
-
 const holidays = {
-
-"2026-08-26":"Milad-un-Nabi / Id-e-Milad",
-"2026-09-04":"Janmashtami",
-"2026-10-02":"Gandhi Jayanti",
-"2026-10-20":"Dussehra",
-"2026-11-08":"Diwali",
-"2026-11-24":"Guru Nanak's Birthday",
-"2026-12-25":"Christmas Day"
-
+  "2026-08-26":"Milad-un-Nabi / Id-e-Milad","2026-09-04":"Janmashtami","2026-10-02":"Gandhi Jayanti",
+  "2026-10-20":"Dussehra","2026-11-08":"Diwali","2026-11-24":"Guru Nanak's Birthday","2026-12-25":"Christmas Day"
 };
-
-
-/* ==========================================================
-   DATE RANGE
-
-   IMPORTANT FIX:
-
-   We use LOCAL dates.
-
-   We do NOT use:
-
-       toISOString()
-
-   because it converts the date to UTC and can move
-   a date backward/forward depending on timezone.
-
-   ========================================================== */
-
-const START =
-new Date(2026,7,17,12,0,0);
-
-const END =
-new Date(2027,0,31,12,0,0);
-
-
-const dayNames = [
-"Sun",
-"Mon",
-"Tue",
-"Wed",
-"Thu",
-"Fri",
-"Sat"
-];
-
-const monthNames = [
-"Jan",
-"Feb",
-"Mar",
-"Apr",
-"May",
-"Jun",
-"Jul",
-"Aug",
-"Sep",
-"Oct",
-"Nov",
-"Dec"
-];
-
-
-/* ==========================================================
-   ATTENDANCE
-   ========================================================== */
-
+const START=new Date("2026-08-17T00:00:00"), END=new Date("2027-01-31T00:00:00");
+const dayNames=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const monthNames=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 let attendance={};
+try{ attendance=JSON.parse(localStorage.getItem("eceAttendance")||"{}"); }catch(e){ attendance={}; }
 
-try{
-
-const stored =
-localStorage.getItem("eceAttendance");
-
-if(stored){
-
-attendance =
-normalizeAttendance(
-JSON.parse(stored)
-);
-
+// One-time repair for data created by the old UTC-based date code.
+// The old code stored a selected local date as the previous calendar date in India.
+const DATE_FIX_VERSION="2";
+if(localStorage.getItem("eceDateFixVersion")!==DATE_FIX_VERSION){
+  const repaired={};
+  Object.entries(attendance).forEach(([k,v])=>{
+    const m=k.match(/^(\d{4}-\d{2}-\d{2})_(\d+)$/);
+    if(!m || !["P","A","N"].includes(v)) return;
+    repaired[shiftDate(m[1],1)+"_"+m[2]]=v;
+  });
+  attendance=repaired;
+  save();
+  localStorage.setItem("eceDateFixVersion",DATE_FIX_VERSION);
 }
-
-}catch(e){
-
-attendance={};
-
-}
-
 let selected=null;
 
-
-/* ==========================================================
-   NORMALIZE ATTENDANCE BACKUP
-   ========================================================== */
-
-function normalizeAttendance(data){
-
-const out={};
-
-if(
-!data ||
-typeof data!=="object"
-){
-
-return out;
-
-}
-
-Object.entries(data).forEach(
-([k,v])=>{
-
-const match =
-k.match(
-/^(\d{4}-\d{2}-\d{2})_([0-9]+)$/
-);
-
-if(!match){
-
-return;
-
-}
-
-const status =
-String(v).toUpperCase();
-
-if(
-status==="P" ||
-status==="A" ||
-status==="N"
-){
-
-out[k]=status;
-
-}
-
-});
-
-return out;
-
-}
-
-
-/* ==========================================================
-   DATE → YYYY-MM-DD
-
-   THIS IS THE IMPORTANT FIX.
-
-   ========================================================== */
-
 function dateStr(d){
-
-const year =
-d.getFullYear();
-
-const month =
-String(
-d.getMonth()+1
-).padStart(2,"0");
-
-const day =
-String(
-d.getDate()
-).padStart(2,"0");
-
-return `${year}-${month}-${day}`;
-
+  const y=d.getFullYear();
+  const m=String(d.getMonth()+1).padStart(2,"0");
+  const day=String(d.getDate()).padStart(2,"0");
+  return `${y}-${m}-${day}`;
 }
-
-
-/* ==========================================================
-   ATTENDANCE KEY
-   ========================================================== */
-
-function key(ds,i){
-
-return ds+"_"+i;
-
+function dateFromStr(ds){ return new Date(ds+"T12:00:00"); }
+function shiftDate(ds,days){
+  const d=dateFromStr(ds);
+  d.setDate(d.getDate()+days);
+  return dateStr(d);
 }
-
-
-/* ==========================================================
-   SAVE
-   ========================================================== */
-
-function save(){
-
-try{
-
-localStorage.setItem(
-"eceAttendance",
-JSON.stringify(
-attendance
-)
-);
-
-}catch(e){}
-
-}
-
-
-/* ==========================================================
-   PERIODS
-   ========================================================== */
-
+function key(ds,i){ return ds+"_"+i; }
+function save(){ try{ localStorage.setItem("eceAttendance", JSON.stringify(attendance)); }catch(e){} }
 function periodFor(ds){
-
-if(
-ds>="2026-10-18" &&
-ds<="2026-10-25"
-){
-
-return [
-"Autumn Vacation",
-"vacation"
-];
-
+  if(ds>="2026-10-18"&&ds<="2026-10-25") return ["Autumn Vacation","vacation"];
+  if(ds>="2026-11-21"&&ds<="2026-12-03") return ["Preparation / Practical Exams","exam"];
+  if(ds>="2026-12-04"&&ds<="2026-12-24") return ["Theory Examinations","exam"];
+  if(ds>="2026-12-25"&&ds<="2026-12-31") return ["Winter Vacation","vacation"];
+  if(ds>="2027-01-01") return ["Semester 2 begins — new timetable required","exam"];
+  return null;
 }
-
-if(
-ds>="2026-11-21" &&
-ds<="2026-12-03"
-){
-
-return [
-"Preparation / Practical Exams",
-"exam"
-];
-
-}
-
-if(
-ds>="2026-12-04" &&
-ds<="2026-12-24"
-){
-
-return [
-"Theory Examinations",
-"exam"
-];
-
-}
-
-if(
-ds>="2026-12-25" &&
-ds<="2026-12-31"
-){
-
-return [
-"Winter Vacation",
-"vacation"
-];
-
-}
-
-if(
-ds>="2027-01-01"
-){
-
-return [
-"Semester 2 begins — new timetable required",
-"exam"
-];
-
-}
-
-return null;
-
-}
-
-
-/* ==========================================================
-   CLASSES FOR DATE
-   ========================================================== */
-
 function classesFor(d,ds){
-
-const day =
-d.getDay();
-
-if(!schedule[day]){
-
-return [];
-
+  const day=d.getDay();
+  if(!schedule[day]) return [];
+  if(holidays[ds]) return [];
+  if(periodFor(ds)) return [];
+  if(ds>"2026-11-20") return [];
+  return schedule[day];
 }
-
-if(holidays[ds]){
-
-return [];
-
-}
-
-if(periodFor(ds)){
-
-return [];
-
-}
-
-if(ds>"2026-11-20"){
-
-return [];
-
-}
-
-return schedule[day];
-
-}
-
-
-/* ==========================================================
-   GET DATES
-   ========================================================== */
-
-function getDates(){
-
-const arr=[];
-
-let d =
-new Date(START);
-
-while(d<=END){
-
-arr.push(
-new Date(d)
-);
-
-d.setDate(
-d.getDate()+1
-);
-
-}
-
-return arr;
-
-}
-
-
-/* ==========================================================
-   GET ALL CLASSES
-   ========================================================== */
-
+function getDates(){ const a=[]; let d=new Date(START); while(d<=END){ a.push(new Date(d)); d.setDate(d.getDate()+1);} return a; }
 function getAllClasses(){
-
-const result=[];
-
-getDates().forEach(
-d=>{
-
-const ds =
-dateStr(d);
-
-classesFor(d,ds)
-.forEach(
-(c,i)=>{
-
-result.push({
-
-ds:ds,
-
-index:i,
-
-subject:c[1],
-
-status:
-attendance[
-key(ds,i)
-] || ""
-
-});
-
-});
-
-});
-
-return result;
-
+  const r=[];
+  getDates().forEach(d=>{ const ds=dateStr(d); classesFor(d,ds).forEach((c,i)=>{ r.push({ds,index:i,subject:c[1],status:attendance[key(ds,i)]||""}); }); });
+  return r;
 }
-
-
-/* ==========================================================
-   DAY STATUS
-   ========================================================== */
-
 function dayStatusClass(d,ds){
-
-const day =
-d.getDay();
-
-if(day===0){
-
-return "off-sun";
-
+  const day=d.getDay();
+  if(day===0) return "off-sun";
+  if(holidays[ds]) return "off-holiday";
+  const p=periodFor(ds); if(p) return "off-"+p[1];
+  if(ds>"2026-11-20") return "off-vacation";
+  const cs=classesFor(d,ds);
+  if(!cs.length) return "";
+  let p_=0,a_=0;
+  cs.forEach((c,i)=>{ const s=attendance[key(ds,i)]; if(s==="P")p_++; if(s==="A")a_++; });
+  if(a_>0) return "has-absent";
+  if(p_===cs.length) return "all-present";
+  if(p_>0) return "partial";
+  return "";
 }
-
-if(holidays[ds]){
-
-return "off-holiday";
-
-}
-
-const p =
-periodFor(ds);
-
-if(p){
-
-return "off-"+p[1];
-
-}
-
-if(ds>"2026-11-20"){
-
-return "off-vacation";
-
-}
-
-const classes =
-classesFor(d,ds);
-
-if(!classes.length){
-
-return "";
-
-}
-
-let present=0;
-let absent=0;
-
-classes.forEach(
-(c,i)=>{
-
-const status =
-attendance[
-key(ds,i)
-];
-
-if(status==="P"){
-
-present++;
-
-}
-
-if(status==="A"){
-
-absent++;
-
-}
-
-});
-
-if(absent>0){
-
-return "has-absent";
-
-}
-
-if(present===classes.length){
-
-return "all-present";
-
-}
-
-if(present>0){
-
-return "partial";
-
-}
-
-return "";
-
-}
-
-
-/* ==========================================================
-   RENDER DATE BUBBLES
-   ========================================================== */
 
 function renderBubbles(){
-
-const wrap =
-document.getElementById(
-"bubbleWrap"
-);
-
-wrap.innerHTML="";
-
-const todayDs =
-dateStr(
-new Date()
-);
-
-let lastMonth=null;
-
-getDates().forEach(
-d=>{
-
-const ds =
-dateStr(d);
-
-if(
-d.getMonth()!==lastMonth
-){
-
-lastMonth =
-d.getMonth();
-
-const label =
-document.createElement(
-"div"
-);
-
-label.className =
-"monthlabel";
-
-label.textContent =
-monthNames[
-lastMonth
-];
-
-wrap.appendChild(
-label
-);
-
+  const wrap=document.getElementById("bubbleWrap"); wrap.innerHTML="";
+  const todayDs=dateStr(new Date());
+  let lastMonth=null;
+  getDates().forEach(d=>{
+    const ds=dateStr(d);
+    if(d.getMonth()!==lastMonth){
+      lastMonth=d.getMonth();
+      const lbl=document.createElement("div"); lbl.className="monthlabel"; lbl.textContent=monthNames[lastMonth];
+      wrap.appendChild(lbl);
+    }
+    const b=document.createElement("button");
+    b.className="bubble "+dayStatusClass(d,ds);
+    b.id="b_"+ds;
+    if(ds===todayDs) b.classList.add("today");
+    b.innerHTML=`<span class="wd">${dayNames[d.getDay()]}</span><span class="dt">${d.getDate()}</span><i class="dot"></i>`;
+    b.onclick=()=>selectDay(ds);
+    wrap.appendChild(b);
+  });
 }
-
-const bubble =
-document.createElement(
-"button"
-);
-
-bubble.className =
-"bubble "+
-dayStatusClass(
-d,
-ds
-);
-
-bubble.id =
-"b_"+ds;
-
-if(
-ds===todayDs
-){
-
-bubble.classList.add(
-"today"
-);
-
-}
-
-bubble.innerHTML=`
-
-<span class="wd">
-${dayNames[d.getDay()]}
-</span>
-
-<span class="dt">
-${d.getDate()}
-</span>
-
-<i class="dot"></i>
-
-`;
-
-bubble.onclick =
-()=>selectDay(ds);
-
-wrap.appendChild(
-bubble
-);
-
-});
-
-}
-
-
-/* ==========================================================
-   REFRESH BUBBLE
-   ========================================================== */
-
 function refreshBubble(ds){
-
-/*
-IMPORTANT:
-
-T12:00:00 means local noon.
-
-This prevents timezone rollover.
-*/
-
-const d =
-new Date(
-ds+"T12:00:00"
-);
-
-const el =
-document.getElementById(
-"b_"+ds
-);
-
-if(!el){
-
-return;
-
+  const d=dateFromStr(ds);
+  const el=document.getElementById("b_"+ds);
+  if(!el) return;
+  const wasToday=el.classList.contains("today"), wasSel=el.classList.contains("selected");
+  el.className="bubble "+dayStatusClass(d,ds);
+  if(wasToday) el.classList.add("today");
+  if(wasSel) el.classList.add("selected");
 }
-
-const wasToday =
-el.classList.contains(
-"today"
-);
-
-const wasSelected =
-el.classList.contains(
-"selected"
-);
-
-el.className =
-"bubble "+
-dayStatusClass(
-d,
-ds
-);
-
-if(wasToday){
-
-el.classList.add(
-"today"
-);
-
-}
-
-if(wasSelected){
-
-el.classList.add(
-"selected"
-);
-
-}
-
-}
-
-
-/* ==========================================================
-   SELECT DAY
-   ========================================================== */
-
 function selectDay(ds){
-
-if(selected){
-
-const previous =
-document.getElementById(
-"b_"+selected
-);
-
-if(previous){
-
-previous.classList.remove(
-"selected"
-);
-
+  if(selected){ const prev=document.getElementById("b_"+selected); if(prev) prev.classList.remove("selected"); }
+  selected=ds;
+  const el=document.getElementById("b_"+ds); if(el){ el.classList.add("selected"); el.scrollIntoView({behavior:"smooth",inline:"center",block:"nearest"}); }
+  renderDetail(ds);
 }
-
-}
-
-selected=ds;
-
-const el =
-document.getElementById(
-"b_"+ds
-);
-
-if(el){
-
-el.classList.add(
-"selected"
-);
-
-el.scrollIntoView({
-
-behavior:"smooth",
-
-inline:"center",
-
-block:"nearest"
-
-});
-
-}
-
-renderDetail(ds);
-
-}
-
-
-/* ==========================================================
-   RENDER DETAIL
-   ========================================================== */
-
 function renderDetail(ds){
-
-/*
-IMPORTANT FIX:
-
-Always parse stored calendar dates
-at local noon.
-*/
-
-const d =
-new Date(
-ds+"T12:00:00"
-);
-
-const card =
-document.getElementById(
-"detailCard"
-);
-
-const full =
-d.toLocaleDateString(
-"en-IN",
-{
-weekday:"long",
-day:"2-digit",
-month:"short",
-year:"numeric"
+  const d=dateFromStr(ds);
+  const card=document.getElementById("detailCard");
+  const full=d.toLocaleDateString("en-IN",{weekday:"long",day:"2-digit",month:"short",year:"numeric"});
+  let badge="", cls="";
+  if(d.getDay()===0){ badge="Sunday"; }
+  else if(holidays[ds]){ badge=holidays[ds]; cls="holiday"; }
+  else{ const p=periodFor(ds); if(p){ badge=p[0]; cls=p[1]; } else if(ds>"2026-11-20"){ badge="Semester 2 begins — new timetable required"; cls="exam"; } }
+  let html=`<div class="ddate">${full}</div>`;
+  if(badge) html+=`<div class="dbadge ${cls}">${badge}</div>`;
+  const cs=classesFor(d,ds);
+  if(!cs.length){
+    html+=`<div class="empty">${d.getDay()===0?"No classes on Sundays.":badge?"No classes — "+badge.toLowerCase()+".":"No scheduled classes."}</div>`;
+  }else{
+    cs.forEach((c,i)=>{
+      const k=key(ds,i), val=attendance[k]||"";
+      html+=`<div class="classrow">
+        <div class="cinfo"><div class="time">${c[0]}</div><div class="subject">${c[1]}</div><div class="details">${c[2]}</div></div>
+        <div class="actions">
+          <button class="present ${val==="P"?"active":""}" onclick="mark('${ds}',${i})">✓ Present</button>
+          <button class="absent ${val==="A"?"active":""}" onclick="markA('${ds}',${i})">✕ Absent</button>
+          <button class="na ${val==="N"?"active":""}" onclick="markN('${ds}',${i})">— N/H</button>
+        </div></div>`;
+    });
+  }
+  card.innerHTML=html;
 }
-);
-
-let badge="";
-let cls="";
-
-if(
-d.getDay()===0
-){
-
-badge="Sunday";
-
-}
-
-else if(
-holidays[ds]
-){
-
-badge=
-holidays[ds];
-
-cls="holiday";
-
-}
-
-else{
-
-const p =
-periodFor(ds);
-
-if(p){
-
-badge=p[0];
-
-cls=p[1];
-
-}
-
-else if(
-ds>"2026-11-20"
-){
-
-badge=
-"Semester 2 begins — new timetable required";
-
-cls="exam";
-
-}
-
-}
-
-let html=`
-
-<div class="ddate">
-${full}
-</div>
-
-`;
-
-if(badge){
-
-html+=`
-
-<div class="dbadge ${cls}">
-${badge}
-</div>
-
-`;
-
-}
-
-const classes =
-classesFor(
-d,
-ds
-);
-
-if(!classes.length){
-
-html+=`
-
-<div class="empty">
-
-${
-d.getDay()===0
-?
-"No classes on Sundays."
-:
-badge
-?
-"No classes — "+
-badge.toLowerCase()+
-"."
-:
-"No scheduled classes."
-}
-
-</div>
-
-`;
-
-}
-
-else{
-
-classes.forEach(
-(c,i)=>{
-
-const k =
-key(ds,i);
-
-const val =
-attendance[k] || "";
-
-html+=`
-
-<div class="classrow">
-
-<div class="cinfo">
-
-<div class="time">
-${c[0]}
-</div>
-
-<div class="subject">
-${c[1]}
-</div>
-
-<div class="details">
-${c[2]}
-</div>
-
-</div>
-
-
-<div class="actions">
-
-<button
-class="present ${
-val==="P"
-?
-"active"
-:
-""
-}"
-onclick="mark('${ds}',${i})">
-
-✓ Present
-
-</button>
-
-
-<button
-class="absent ${
-val==="A"
-?
-"active"
-:
-""
-}"
-onclick="markA('${ds}',${i})">
-
-✕ Absent
-
-</button>
-
-
-<button
-class="na ${
-val==="N"
-?
-"active"
-:
-""
-}"
-onclick="markN('${ds}',${i})">
-
-— N/H
-
-</button>
-
-</div>
-
-</div>
-
-`;
-
-});
-
-}
-
-card.innerHTML=html;
-
-}
-
-
-/* ==========================================================
-   ATTENDANCE MARKING
-   ========================================================== */
-
-function setMark(ds,i,val){
-
-attendance[
-key(ds,i)
-]=val;
-
-save();
-
-refreshBubble(ds);
-
-renderDetail(ds);
-
-renderStats();
-
-}
-
-
-function mark(ds,i){
-
-setMark(
-ds,
-i,
-"P"
-);
-
-}
-
-
-function markA(ds,i){
-
-setMark(
-ds,
-i,
-"A"
-);
-
-}
-
-
-function markN(ds,i){
-
-setMark(
-ds,
-i,
-"N"
-);
-
-}
-
-
-/* ==========================================================
-   STATISTICS
-   ========================================================== */
+function setMark(ds,i,val){ attendance[key(ds,i)]=val; save(); refreshBubble(ds); renderDetail(ds); renderStats(); }
+function mark(ds,i){ setMark(ds,i,"P"); }
+function markA(ds,i){ setMark(ds,i,"A"); }
+function markN(ds,i){ setMark(ds,i,"N"); }
 
 function renderStats(){
-
-const all =
-getAllClasses();
-
-const marked =
-all.filter(
-x=>
-x.status==="P" ||
-x.status==="A"
-);
-
-const p =
-marked.filter(
-x=>x.status==="P"
-).length;
-
-const a =
-marked.filter(
-x=>x.status==="A"
-).length;
-
-const pct =
-marked.length
-?
-Math.round(
-p/marked.length*100
-)
-:
-0;
-
-document.getElementById(
-"overall"
-).textContent =
-pct+"%";
-
-document.getElementById(
-"presentCount"
-).textContent =
-p;
-
-document.getElementById(
-"absentCount"
-).textContent =
-a;
-
-document.getElementById(
-"totalCount"
-).textContent =
-marked.length;
-
-
-const subs={};
-
-all.forEach(
-x=>{
-
-const name =
-x.subject.split(
-" — "
-)[0];
-
-if(!subs[name]){
-
-subs[name]={
-p:0,
-a:0
-};
-
+  const all=getAllClasses();
+  const marked=all.filter(x=>x.status==="P"||x.status==="A");
+  const p=marked.filter(x=>x.status==="P").length, a=marked.filter(x=>x.status==="A").length;
+  const pct=marked.length?Math.round(p/marked.length*100):0;
+  document.getElementById("overall").textContent=pct+"%";
+  document.getElementById("presentCount").textContent=p;
+  document.getElementById("absentCount").textContent=a;
+  document.getElementById("totalCount").textContent=marked.length;
+  const subs={};
+  all.forEach(x=>{ const name=x.subject.split(" — ")[0]; if(!subs[name]) subs[name]={p:0,a:0}; if(x.status==="P")subs[name].p++; if(x.status==="A")subs[name].a++; });
+  const box=document.getElementById("subjects"); box.innerHTML="";
+  Object.entries(subs).forEach(([name,v])=>{
+    const total=v.p+v.a, pc=total?Math.round(v.p/total*100):0;
+    const c=document.createElement("div"); c.className="subjectcard";
+    c.innerHTML=`<b>${name}</b><small>${v.p} present · ${v.a} absent · ${total} marked</small><div class="progress"><i style="width:${pc}%"></i></div><small>${pc}% attendance</small>`;
+    box.appendChild(c);
+  });
 }
-
-if(x.status==="P"){
-
-subs[name].p++;
-
-}
-
-if(x.status==="A"){
-
-subs[name].a++;
-
-}
-
-});
-
-
-const box =
-document.getElementById(
-"subjects"
-);
-
-box.innerHTML="";
-
-
-Object.entries(subs)
-.forEach(
-([name,v])=>{
-
-const total =
-v.p+v.a;
-
-const pc =
-total
-?
-Math.round(
-v.p/total*100
-)
-:
-0;
-
-const c =
-document.createElement(
-"div"
-);
-
-c.className =
-"subjectcard";
-
-c.innerHTML=`
-
-<b>
-${name}
-</b>
-
-<small>
-${v.p} present ·
-${v.a} absent ·
-${total} marked
-</small>
-
-<div class="progress">
-
-<i
-style="width:${pc}%">
-</i>
-
-</div>
-
-<small>
-${pc}% attendance
-</small>
-
-`;
-
-box.appendChild(c);
-
-});
-
-}
-
-
-/* ==========================================================
-   TABS
-   ========================================================== */
-
 function showTab(t){
-
-document
-.getElementById(
-"panelSchedule"
-)
-.classList.toggle(
-"active",
-t==="schedule"
-);
-
-document
-.getElementById(
-"panelSummary"
-)
-.classList.toggle(
-"active",
-t==="summary"
-);
-
-document
-.getElementById(
-"tabBtnSchedule"
-)
-.classList.toggle(
-"active",
-t==="schedule"
-);
-
-document
-.getElementById(
-"tabBtnSummary"
-)
-.classList.toggle(
-"active",
-t==="summary"
-);
-
+  document.getElementById("panelSchedule").classList.toggle("active",t==="schedule");
+  document.getElementById("panelSummary").classList.toggle("active",t==="summary");
+  document.getElementById("tabBtnSchedule").classList.toggle("active",t==="schedule");
+  document.getElementById("tabBtnSummary").classList.toggle("active",t==="summary");
 }
-
-
-/* ==========================================================
-   TODAY
-   ========================================================== */
-
 function goToday(){
-
-let ds =
-dateStr(
-new Date()
-);
-
-if(
-ds<dateStr(START)
-){
-
-ds =
-dateStr(START);
-
+  let ds=dateStr(new Date());
+  if(ds<dateStr(START)) ds=dateStr(START);
+  if(ds>dateStr(END)) ds=dateStr(END);
+  showTab("schedule");
+  selectDay(ds);
 }
-
-if(
-ds>dateStr(END)
-){
-
-ds =
-dateStr(END);
-
-}
-
-showTab(
-"schedule"
-);
-
-selectDay(ds);
-
-}
-
-
-/* ==========================================================
-   EXPORT
-   ========================================================== */
-
 function exportData(){
-
-const blob =
-new Blob(
-[
-JSON.stringify(
-attendance,
-null,
-2
-)
-],
-{
-type:
-"application/json"
+  // Export exactly what is marked, with the real calendar date and class attached.
+  const records=[];
+  Object.entries(attendance).forEach(([k,status])=>{
+    if(!["P","A","N"].includes(status)) return;
+    const m=k.match(/^(\d{4}-\d{2}-\d{2})_(\d+)$/);
+    if(!m) return;
+    const ds=m[1], index=Number(m[2]), d=dateFromStr(ds), classes=classesFor(d,ds);
+    const c=classes[index];
+    records.push({
+      date:ds,
+      day:dayNames[d.getDay()],
+      period:index+1,
+      time:c?.[0]||"",
+      subject:c?.[1]||"",
+      details:c?.[2]||"",
+      status
+    });
+  });
+  records.sort((a,b)=>a.date.localeCompare(b.date)||a.period-b.period);
+  const payload={
+    formatVersion:2,
+    exportedAt:new Date().toISOString(),
+    records
+  };
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url; a.download="ece-attendance-backup.json"; a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
-);
-
-const a =
-document.createElement(
-"a"
-);
-
-a.href =
-URL.createObjectURL(
-blob
-);
-
-a.download =
-"ece-attendance-backup.json";
-
-a.click();
-
-URL.revokeObjectURL(
-a.href
-);
-
-}
-
-
-/* ==========================================================
-   IMPORT
-   ========================================================== */
-
 function importData(e){
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=()=>{
+    try{
+      const parsed=JSON.parse(reader.result);
+      let imported={};
 
-const file =
-e.target.files[0];
+      if(parsed && parsed.formatVersion===2 && Array.isArray(parsed.records)){
+        parsed.records.forEach(r=>{
+          if(/^\d{4}-\d{2}-\d{2}$/.test(r.date) && Number.isInteger(r.period) && ["P","A","N"].includes(r.status)){
+            imported[key(r.date,r.period-1)]=r.status;
+          }
+        });
+      }else if(parsed && typeof parsed==="object" && !Array.isArray(parsed)){
+        // Legacy exports from the broken UTC version: repair their dates once on import.
+        Object.entries(parsed).forEach(([k,v])=>{
+          const m=k.match(/^(\d{4}-\d{2}-\d{2})_(\d+)$/);
+          if(m && ["P","A","N"].includes(v)) imported[shiftDate(m[1],1)+"_"+m[2]]=v;
+        });
+      }else{ throw new Error("Invalid format"); }
 
-if(!file){
-
-return;
-
+      attendance=imported;
+      save();
+      localStorage.setItem("eceDateFixVersion",DATE_FIX_VERSION);
+      renderBubbles();
+      if(selected) renderDetail(selected);
+      renderStats();
+      alert("Attendance backup imported correctly.");
+    }catch(err){ alert("Invalid attendance backup file."); }
+  };
+  reader.readAsText(file);
 }
-
-const reader =
-new FileReader();
-
-reader.onload=()=>{
-
-try{
-
-const imported =
-JSON.parse(
-reader.result
-);
-
-attendance =
-normalizeAttendance(
-imported
-);
-
-save();
-
-renderBubbles();
-
-if(selected){
-
-renderDetail(
-selected
-);
-
-}
-
-renderStats();
-
-alert(
-"Attendance backup imported."
-);
-
-}
-
-catch(err){
-
-alert(
-"Invalid attendance backup file."
-);
-
-}
-
-};
-
-reader.readAsText(
-file
-);
-
-}
-
-
-/* ==========================================================
-   RESET
-   ========================================================== */
-
 function clearData(){
-
-if(
-confirm(
-"Delete all attendance records? This cannot be undone."
-)
-){
-
-attendance={};
-
-save();
-
+  if(confirm("Delete all attendance records? This cannot be undone.")){
+    attendance={}; save(); renderBubbles(); if(selected) renderDetail(selected); renderStats();
+  }
+}
 renderBubbles();
-
-if(selected){
-
-renderDetail(
-selected
-);
-
-}
-
 renderStats();
-
-}
-
-}
-
-
-/* ==========================================================
-   START APP
-   ========================================================== */
-
-renderBubbles();
-
-renderStats();
-
 goToday();
-
 </script>
-
 </body>
 </html>
